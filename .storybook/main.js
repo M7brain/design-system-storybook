@@ -17,7 +17,6 @@ const config = {
     '@storybook/addon-docs',
   ],
   framework: '@storybook/nextjs-vite',
-  staticDirs: ['..\\public'],
   viteFinal: async (viteConfig) => {
     viteConfig.resolve = viteConfig.resolve ?? {};
     viteConfig.resolve.alias = {
