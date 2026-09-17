@@ -1,0 +1,811 @@
+/* ═══════════════════════════════════════════════════════════
+   Quicklo — Design System Tokens
+   Two-layer architecture: Primitives → Semantics
+   ─────────────────────────────────────────────────────────
+   Layer 1 (--primitive-*): Raw hex palette. Defined in
+   @theme. Never referenced in component code — only used
+   here to define Layer 2.
+   ─────────────────────────────────────────────────────────
+   Layer 2 (--color-*): Semantic tokens. Defined in :root
+   (light) and .dark. All component code uses ONLY these.
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+/* Tailwind v4's `dark:` variant defaults to `@media (prefers-color-scheme: dark)`.
+   This design system's actual dark mode is a manual `.dark` class on <html> (see
+   Layer 2 below and CLAUDE.md) — not the OS preference. This custom variant makes
+   `dark:` utilities key off that class instead, so `dark:` classnames written in
+   components (e.g. Select's color-scheme hint) track the app's real theme toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+
+  /* ════════════════════════════════════════════════════════
+     NON-COLOUR TOKENS
+     ════════════════════════════════════════════════════════ */
+
+  /* ── Typography — fonts locked in brand sprint ────────────
+     Outfit: headings and display only (H1–H3 + display tokens)
+     Inter:  everything else — body, UI, labels, buttons, inputs
+     Rem only. No px for any font-size or line-height. Ever.
+     Base: 1rem = 16px. All line-heights are multiples of 0.25rem (4px grid). */
+
+  --font-heading: 'Outfit', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+
+  /* Display — marketing and landing pages only, never in dashboard UI */
+  --text-display:       3rem;          /* 48px | lh 3.5rem  | Outfit 700 | track -0.03em  */
+  --text-display-sm:    2.25rem;       /* 36px | lh 2.75rem | Outfit 700 | track -0.025em */
+
+  /* Heading — product UI, H1 through H4 */
+  --text-h1:            1.75rem;       /* 28px | lh 2.25rem | Outfit 700 | track -0.02em  */
+  --text-h2:            1.375rem;      /* 22px | lh 1.75rem | Outfit 600 | track -0.015em */
+  --text-h3:            1.125rem;      /* 18px | lh 1.5rem  | Outfit 600 | track -0.01em  */
+  --text-h4:            1.25rem;       /* 20px | lh 1.75rem | Inter 600  | track 0        */
+
+  /* Text — UI body, single-line elements, buttons, inputs, nav */
+  --text-body-lg:       1rem;          /* 16px | lh 1.5rem  | Inter 400  | track 0        */
+  --text-body-md:       0.875rem;      /* 14px | lh 1.25rem | Inter 400  | track 0        */
+  --text-body-sm:       0.75rem;       /* 12px | lh 1rem    | Inter 400  | track 0        */
+
+  /* Paragraph — multi-line reading copy, NOT single-line UI elements */
+  --text-paragraph:     1rem;          /* 16px | lh 1.75rem | Inter 400  | track 0        */
+
+  /* Label — badges, status chips, eyebrows, nav labels — always uppercase */
+  --text-label-md:      0.75rem;       /* 12px | lh 1rem    | Inter 500  | track +0.04em  */
+  --text-label-sm:      0.6875rem;     /* 11px | lh 1rem    | Inter 500  | track +0.06em  */
+
+  /* ── Spacing scale — px intentional (layout unit, not text-relative)
+     Naming follows Tailwind convention: number = px value ÷ 4.
+     NEVER use arbitrary px values for padding, margin, gap, height, or width.
+     MICRO tokens (px, 0.5) are precision-only — never for layout or structure. */
+
+  /* Micro — hairlines and pixel nudges only */
+  --space-px:   1px;   /* hairline borders, 1px dividers, pixel nudges          */
+  --space-0\.5: 2px;   /* fine icon nudges, sub-grid adjustments — not layout   */
+
+  /* Core scale — all component padding, gap, and margin */
+  --space-1:    4px;   /* icon gap, tight inline padding, progress bar height   */
+  --space-2:    8px;   /* badge padding, input icon gap, tight button padding   */
+  --space-2\.5: 10px;  /* input padding vertical, medium button padding         */
+  --space-3:    12px;  /* button horizontal padding (sm), list item gap         */
+  --space-3\.5: 14px;  /* input horizontal padding (md + lg)                    */
+  --space-4:    16px;  /* card inner padding, row base, mobile page gutter      */
+  --space-5:    20px;  /* button horizontal padding (lg), section padding (sm)  */
+  --space-6:    24px;  /* card vertical padding, section gap (tight)            */
+  --space-7:    28px;  /* comfortable list item padding, medium component gap   */
+  --space-8:    32px;  /* section gaps, sidebar item spacing                    */
+  --space-10:   40px;  /* large section gaps, modal padding                     */
+  --space-12:   48px;  /* page section margins, hero vertical padding (sm)      */
+
+  /* Large scale — sections, page layout, and landing page spacing */
+  --space-14:   56px;  /* nav bar height reference, large component height      */
+  --space-16:   64px;  /* major layout gaps, hero content spacing               */
+  --space-20:   80px;  /* hero section vertical padding, large feature gaps     */
+  --space-24:   96px;  /* page section top/bottom margin, landing padding       */
+  --space-32:   128px; /* maximum section spacing, landing hero height basis    */
+
+  /* ── Border radius scale — px intentional (fixed geometry, not text-relative)
+     All values are multiples of 4px. --radius-full is the universal pill
+     convention (9999px) — intentional exception to the 4px rule. */
+  --radius-xs:   4px;     /* tags, chips, tight badges                        */
+  --radius-sm:   8px;     /* buttons, inputs, dropdowns                       */
+  --radius-md:   12px;    /* cards, surface containers                        */
+  --radius-lg:   16px;    /* panels, sidebars, large cards                    */
+  --radius-xl:   20px;    /* modals, dialogs                                  */
+  --radius-2xl:  24px;    /* drawers, bottom sheets, landing hero cards       */
+  --radius-full: 9999px;  /* badges, pills, avatars, toggles                  */
+
+  /* ── Opacity scale — unitless values (CSS opacity property takes 0–1)
+     Use only these values for opacity across the entire product.
+     Never hardcode arbitrary opacity values in components.
+     --opacity-disabled is a semantic alias — always use it for disabled
+     states so a single token change propagates everywhere. */
+  --opacity-0:        0;     /* invisible — animation start/end              */
+  --opacity-10:       0.1;   /* subtle tint, ghost hover                     */
+  --opacity-20:       0.2;   /* light overlay, watermark                     */
+  --opacity-30:       0.3;   /* muted element, de-emphasis                   */
+  --opacity-40:       0.4;   /* disabled — use --opacity-disabled alias       */
+  --opacity-50:       0.5;   /* half-visible, placeholder states              */
+  --opacity-60:       0.6;   /* secondary surface overlay                    */
+  --opacity-70:       0.7;   /* strong overlay, tooltip background            */
+  --opacity-80:       0.8;   /* modal scrim, backdrop                         */
+  --opacity-90:       0.9;   /* near-opaque, loading overlay                 */
+  --opacity-100:      1;     /* fully visible — animation start/end          */
+
+  /* Semantic alias — components use this name, not --opacity-40 directly */
+  --opacity-disabled: var(--opacity-40);
+
+  /* ── Shadow primitives — the CSS values
+     These are raw values. Components NEVER reference these directly.
+     Always use --elevation-* semantic tokens instead.
+     Primitives never change between light and dark mode. */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 16px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+
+  /* ── Elevation semantic tokens — what components use
+     Elevation = how high above the base surface an element appears.
+     Components always reference --elevation-* never --shadow-* directly.
+     Dark mode overrides these in the .dark block below — primitives unchanged.
+     Level 0 → flush (table rows, flat list items)
+     Level 1 → raised (cards, content panels)
+     Level 2 → floating (dropdowns, tooltips, sticky headers)
+     Level 3 → prominent (modals, dialogs, bottom sheets) */
+  --elevation-0: var(--shadow-none);
+  --elevation-1: var(--shadow-sm);
+  --elevation-2: var(--shadow-md);
+  --elevation-3: var(--shadow-lg);
+
+  /* ── Motion — durations and easing curves ────────────────
+     Two groups: Transition durations (UI state changes) and
+     Animation durations (continuous loops — never use
+     transition tokens for skeleton or pulse animations).
+     Easing names map to usage intent, not CSS property names.
+     Components always reference tokens — never hardcode
+     duration or easing values. */
+
+  /* Transition durations — UI state changes */
+  --duration-instant:  50ms;    /* focus rings, active press states             */
+  --duration-fast:     100ms;   /* toggle, checkbox, badge state change         */
+  --duration-base:     200ms;   /* hover, focus, colour transitions — default   */
+  --duration-slow:     300ms;   /* modal open, drawer slide, panel expand       */
+  --duration-slower:   400ms;   /* page transitions, onboarding step changes    */
+
+  /* Animation durations — continuous loops */
+  --duration-skeleton: 1500ms;  /* skeleton shimmer — use with ease-linear      */
+  --duration-pulse:                  2000ms;  /* pulse/breathe on avatars, status dots        */
+  --duration-spinner:                 700ms;  /* spinning loader icon                         */
+  --duration-progress-indeterminate: 1800ms;  /* indeterminate progress bar slide             */
+
+  /* Delay */
+  --delay-stagger:     50ms;    /* per-item increment for staggered list entry  */
+  --delay-tooltip:    500ms;    /* cursor-rest wait before tooltip appears       */
+
+  /* Persistence timer — NOT a transition or animation duration. This governs
+     how long a Toast stays on screen before auto-dismissing; it is a display-
+     persistence timer, not motion, so it is DELIBERATELY EXCLUDED from the
+     prefers-reduced-motion collapse below (that block only zeroes tokens that
+     drive CSS transitions/animations — collapsing this one would make success/
+     info toasts vanish instantly for reduced-motion users, which has nothing
+     to do with their motion preference and would make toasts undismissable-
+     in-time). Toast's enter/exit slide+fade still use --duration-base like
+     everything else, and that one DOES collapse to 0ms as expected. */
+  --duration-toast:   5000ms;   /* Toast auto-dismiss persistence (success/info) */
+
+  /* Easing — cubic-bezier values, named by usage intent */
+  --ease-default: cubic-bezier(0, 0, 0.2, 1);        /* standard UI transitions */
+  --ease-enter:   cubic-bezier(0, 0, 0.2, 1);        /* elements entering screen */
+  --ease-exit:    cubic-bezier(0.4, 0, 1, 1);        /* elements leaving screen  */
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1); /* toggle, checkbox, success — subtle overshoot */
+  --ease-linear:  linear;                             /* progress bars, shimmer  */
+
+  /* ── BREAKPOINTS ─────────────────────────────────────── */
+  /* Mobile-first. All values are min-width thresholds.    */
+  /* xs is a floor constraint only — not a Tailwind bp     */
+  --breakpoint-xs:  375px;  /* Floor: iPhone SE / small Android  */
+  --breakpoint-sm:  600px;  /* Tablet: nav rail appears           */
+  --breakpoint-md:  768px;  /* Tablet: lead detail side panel     */
+  --breakpoint-lg: 1024px;  /* Desktop: full sidebar appears      */
+  --breakpoint-xl: 1280px;  /* Desktop: sidebar expanded default  */
+  --breakpoint-2xl:1536px;  /* Wide: content max-width cap only   */
+
+
+  /* ════════════════════════════════════════════════════════
+     LAYER 1 — PRIMITIVES
+     ────────────────────────────────────────────────────────
+     Raw palette. Components never reference these directly.
+     Only semantic tokens (Layer 2) reference primitives.
+     Hex values are sourced from the Quicklo brand palette.  */
+
+  /* Orange — warm brand, dark mode interactive */
+  --primitive-orange-50:  #fff4ec;
+  --primitive-orange-100: #feddc3;
+  --primitive-orange-200: #fdcda5;
+  --primitive-orange-300: #fcb67c;
+  --primitive-orange-400: #fca863;
+  --primitive-orange-500: #fb923c;
+  --primitive-orange-600: #e48537;
+  --primitive-orange-700: #b2682b;
+  --primitive-orange-800: #8a5021;
+  --primitive-orange-900: #693d19;
+
+  /* Brick — deep brand, light mode interactive */
+  --primitive-brick-50:  #f9ece7;
+  --primitive-brick-100: #ecc4b4;
+  --primitive-brick-200: #e3a88f;
+  --primitive-brick-300: #d6805c;
+  --primitive-brick-400: #ce673d;
+  --primitive-brick-500: #c2410c;
+  --primitive-brick-600: #b13b0b;
+  --primitive-brick-700: #8a2e09;
+  --primitive-brick-800: #6b2407;
+  --primitive-brick-900: #511b05;
+
+  /* Cloud — light neutrals */
+  --primitive-cloud-50:  #ffffff;
+  --primitive-cloud-100: #fbfbfb;
+  --primitive-cloud-200: #f9f9f9;
+  --primitive-cloud-300: #f7f7f7;
+  --primitive-cloud-400: #f5f5f5;
+  --primitive-cloud-500: #f3f3f3;
+  --primitive-cloud-600: #dddddd;
+  --primitive-cloud-700: #adadad;
+  --primitive-cloud-800: #868686;
+  --primitive-cloud-900: #666666;
+
+  /* Charcoal — dark neutrals */
+  --primitive-charcoal-50:  #eaeaea;
+  --primitive-charcoal-100: #bdbdbd;
+  --primitive-charcoal-200: #9d9d9d;
+  --primitive-charcoal-300: #707070;
+  --primitive-charcoal-400: #555555;
+  --primitive-charcoal-500: #2a2a2a;
+  --primitive-charcoal-600: #262626;
+  --primitive-charcoal-700: #1e1e1e;
+  --primitive-charcoal-800: #171717;
+  --primitive-charcoal-900: #121212;
+
+  /* Green — success */
+  --primitive-green-50:  #e8f2ec;
+  --primitive-green-100: #b6d8c3;
+  --primitive-green-200: #93c5a6;
+  --primitive-green-300: #62aa7d;
+  --primitive-green-400: #449964;
+  --primitive-green-500: #15803d;
+  --primitive-green-600: #137438;
+  --primitive-green-700: #0f5b2b;
+  --primitive-green-800: #0c4622;
+  --primitive-green-900: #09361a;
+
+  /* Red — error */
+  --primitive-red-50:  #f8e8e8;
+  --primitive-red-100: #e9b9b9;
+  --primitive-red-200: #df9797;
+  --primitive-red-300: #d06767;
+  --primitive-red-400: #c74949;
+  --primitive-red-500: #b91c1c;
+  --primitive-red-600: #a81919;
+  --primitive-red-700: #831414;
+  --primitive-red-800: #660f0f;
+  --primitive-red-900: #4e0c0c;
+
+  /* Yellow — warning (yellow tones, not orange) */
+  --primitive-yellow-50:  #fff9e9;
+  --primitive-yellow-100: #feebbb;
+  --primitive-yellow-200: #fde29a;
+  --primitive-yellow-300: #fcd46c;
+  --primitive-yellow-400: #fccc50;
+  --primitive-yellow-500: #fbbf24;
+  --primitive-yellow-600: #e4ae21;
+  --primitive-yellow-700: #b2881a;
+  --primitive-yellow-800: #8a6914;
+  --primitive-yellow-900: #69500f;
+
+  /* Blue — info */
+  --primitive-blue-50:  #e6f0f6;
+  --primitive-blue-100: #b1d1e2;
+  --primitive-blue-200: #8bbad4;
+  --primitive-blue-300: #569bc0;
+  --primitive-blue-400: #3587b4;
+  --primitive-blue-500: #0369a1;
+  --primitive-blue-600: #036093;
+  --primitive-blue-700: #024b72;
+  --primitive-blue-800: #023a59;
+  --primitive-blue-900: #012c44;
+
+}
+
+
+/* ── Reduced motion — WCAG 2.1 SC 2.3.3 ─────────────────
+   When the user has requested reduced motion in their OS,
+   all transition and animation durations collapse to 0ms.
+   Every component with animation must be wrapped in this.
+   Usage in components:
+     transition: opacity var(--duration-base) var(--ease-default);
+     @media (prefers-reduced-motion: reduce) {
+       transition-duration: var(--duration-reduced);
+       animation-duration: var(--duration-reduced);
+     }                                                    */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant:  0ms;
+    --duration-fast:     0ms;
+    --duration-base:     0ms;
+    --duration-slow:     0ms;
+    --duration-slower:   0ms;
+    --duration-skeleton: 0ms;
+    --duration-pulse:                  0ms;
+    --duration-spinner:                0ms;
+    --duration-progress-indeterminate: 0ms;
+    --delay-stagger:                   0ms;
+    --delay-tooltip:                   0ms;
+    /* --duration-toast is intentionally NOT listed here — it's a display-
+       persistence timer (how long a Toast stays up), not a transition/
+       animation duration. Zeroing it would make toasts vanish instantly
+       regardless of the user's actual motion preference. See its definition
+       above for the full rationale. */
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   LAYER 2 — SEMANTIC TOKENS — LIGHT MODE
+   All component code references ONLY these --color-* tokens.
+   ════════════════════════════════════════════════════════════ */
+:root {
+
+  /* BRAND */
+  --color-brand-btn:            var(--primitive-brick-500);
+  --color-brand-btn-text:       var(--primitive-cloud-50);
+  --color-brand-tint:           var(--primitive-orange-50);
+  --color-brand-tint-text:      var(--primitive-brick-500);
+  /* BRAND TINT BORDER — soft hairline for the brand count Chip (2026-07-09 fix
+     pass). Light: color-mix of --color-interactive-default (brick-500) into
+     --color-bg-surface at 60% — desaturated/soft on purpose (a raw brick-500
+     border reads loud, this is a hairline not a control border). Measured
+     2.62:1 vs --color-bg-surface, 2.36:1 vs --color-bg-primary — inside the
+     ~2-3:1 "visible but soft" target, non-text so WCAG 1.4.11's 3:1 doesn't
+     strictly apply, matching --color-badge-neutral-border's own precedent of
+     a soft, sub-3:1 hairline. Dark: NOT a mixed orange (Marko's call — orange-
+     on-dark reads too hot for a decorative hairline) — instead a direct alias
+     to --color-badge-neutral-border, so the brand and neutral count Chips
+     share the exact same grey hairline in dark mode. See the .dark block
+     below and docs/DOC-colour-system.md for the full rationale. */
+  --color-brand-tint-border:    color-mix(in srgb, var(--color-interactive-default) 60%, var(--color-bg-surface));
+
+  /* BACKGROUND */
+  --color-bg-primary:           var(--primitive-cloud-500);
+  --color-bg-secondary:         var(--primitive-cloud-600);
+  --color-bg-surface:           var(--primitive-cloud-50);
+  --color-bg-overlay:           rgba(0, 0, 0, 0.4);
+  --color-bg-input:             var(--primitive-cloud-500);
+
+  /* TEXT */
+  --color-text-primary:         var(--primitive-charcoal-900);
+  --color-text-secondary:       var(--primitive-charcoal-300);
+  --color-text-tertiary:        var(--primitive-cloud-800);
+  --color-text-on-interactive-primary:    var(--primitive-cloud-50);      /* text on primary (brand CTA) fill — flips per mode */
+  --color-text-on-interactive-secondary:  var(--primitive-charcoal-400);  /* text on secondary fill — light mode only */
+  --color-text-on-interactive-error:      var(--primitive-cloud-50);      /* text on destructive fill — always white, mode-invariant */
+
+  /* BORDER */
+  --color-border-default:       var(--primitive-cloud-600);
+  --color-border-subtle:        var(--primitive-cloud-500);
+  --color-border-strong:        var(--primitive-cloud-700);
+  /* INPUT BORDERS — must pass WCAG 1.4.11 (3:1) vs --color-bg-primary, not vs white.
+     --color-border-strong (cloud-700 #adadad, L=0.418) fails at 2.02:1 against bg-primary
+     (#f3f3f3, L=0.895). cloud-800 (#868686, L=0.239) clears: 3.27:1 vs bg-primary, 3.63:1
+     vs bg-surface. See DECISIONS.md for full math. */
+  --color-border-input:         var(--primitive-cloud-800);   /* #868686 — resting  */
+  --color-border-input-hover:   var(--primitive-cloud-900);   /* #666666 — hover    */
+
+  /* INTERACTIVE — primary (brand CTA) */
+  --color-interactive-default:  var(--primitive-brick-500);
+  --color-interactive-hover:    var(--primitive-brick-600);
+  --color-interactive-active:   var(--primitive-brick-700);
+
+  /* INTERACTIVE — secondary (filled neutral, no border) — 3-step light mode ladder */
+  --color-interactive-secondary:        var(--primitive-charcoal-50);   /* #eaeaea — ⚠ 1.08:1 vs bg-primary; invisible outside a surface card — see item 4 flag */
+  --color-interactive-secondary-hover:  var(--primitive-cloud-600);     /* #dddddd */
+  --color-interactive-secondary-active: var(--primitive-cloud-700);     /* #adadad */
+
+  /* INTERACTIVE — error / destructive (same hex both modes, matches --color-status-error convention) */
+  --color-interactive-error:        var(--primitive-red-500);
+  --color-interactive-error-hover:  var(--primitive-red-600);
+  --color-interactive-error-active: var(--primitive-red-700);
+
+  /* FOCUS RING — alias to brand interactive colour; auto-flips brick↔orange per mode */
+  --color-focus-ring: var(--color-interactive-default);
+
+  /* NAV */
+  --color-nav-inactive:         var(--primitive-cloud-800);
+
+  /* STATUS — badge fills, same both modes */
+  --color-status-success:       var(--primitive-green-500);
+  --color-status-error:         var(--primitive-red-500);
+  --color-status-warning:       var(--primitive-yellow-500);
+  --color-status-info:          var(--primitive-blue-500);
+  /* --color-status-neutral is the ONE status fill with a per-mode override
+     (see the .dark block below) — needed for 3:1 dot-vs-chip contrast on
+     --color-bg-secondary in both modes; a single fixed value couldn't clear
+     3:1 in both. No --color-status-neutral-text exists: neutral status text
+     reuses --color-text-secondary. */
+  --color-status-neutral:       var(--primitive-charcoal-300);  /* #707070 */
+
+  /* STATUS — title text on surface card, light mode */
+  --color-status-success-text:  var(--primitive-green-700);
+  --color-status-error-text:    var(--primitive-red-700);
+  /* yellow-800 (#8a6914), not yellow-700 (#b2881a) — yellow-700 only clears
+     3.27:1 against white, a hard ceiling no badge -bg lightening can cross.
+     yellow-800 clears 4.74:1 against the badge's warning -bg (#fef6e0) and
+     5.11:1 against pure white. This also lets Badge reuse this token
+     uniformly for warning like every other tone (see Badge.jsx). */
+  --color-status-warning-text:  var(--primitive-yellow-800);
+  --color-status-info-text:     var(--primitive-blue-700);
+
+  /* STATUS — background tints for status cards, light mode */
+  --color-status-success-bg:    var(--primitive-green-50);
+  --color-status-error-bg:      var(--primitive-red-50);
+  --color-status-warning-bg:    var(--primitive-yellow-50);
+  --color-status-info-bg:       var(--primitive-blue-50);
+
+  /* BADGE — soft-tint fill + hairline border, derived via color-mix. These
+     are the LIGHT values.
+     IMPORTANT — MUST ALSO BE RE-DECLARED IN THE .dark BLOCK BELOW, not just
+     here: a custom property's var()-substitution is baked in at the element
+     where it's DECLARED, then inherited as an already-resolved value — it
+     does NOT re-substitute per descendant even if a descendant (e.g. a
+     nested .dark div) overrides one of the referenced variables. Verified
+     with a minimal repro (a --probe-derived: color-mix(var(--probe-input)...)
+     declared only at :root, with --probe-input overridden inside a nested
+     .probe-dark div, still resolved using :root's value when read from
+     inside .probe-dark). This is why the original single-declaration version
+     of this block rendered pale LIGHT tints inside Storybook's dark canvas
+     even though --color-bg-surface itself correctly read its dark value
+     there — the badge tokens were frozen at light because .dark never
+     redeclared them. See DOC-colour-system.md for the full contrast audit.
+     Percentages: success/warning/error/info use 14%/30%. Neutral's -bg is
+     8% (not 14%) because --color-text-secondary against the 14% mix fell to
+     4.15:1 in light mode, below AA — 8% clears 4.50:1. */
+  --color-badge-success-bg:      color-mix(in srgb, var(--color-status-success) 14%, var(--color-bg-surface));
+  --color-badge-success-border:  color-mix(in srgb, var(--color-status-success) 30%, var(--color-bg-surface));
+  --color-badge-warning-bg:      color-mix(in srgb, var(--color-status-warning) 14%, var(--color-bg-surface));
+  --color-badge-warning-border:  color-mix(in srgb, var(--color-status-warning) 30%, var(--color-bg-surface));
+  --color-badge-error-bg:        color-mix(in srgb, var(--color-status-error) 14%, var(--color-bg-surface));
+  --color-badge-error-border:    color-mix(in srgb, var(--color-status-error) 30%, var(--color-bg-surface));
+  --color-badge-info-bg:         color-mix(in srgb, var(--color-status-info) 14%, var(--color-bg-surface));
+  --color-badge-info-border:     color-mix(in srgb, var(--color-status-info) 30%, var(--color-bg-surface));
+  --color-badge-neutral-bg:      color-mix(in srgb, var(--color-status-neutral) 8%, var(--color-bg-surface));
+  /* Neutral border stays at 30% in LIGHT (#d4d4d4) — unchanged/approved.
+     The DARK re-declaration below uses 20%, not 30% — see that block for why. */
+  --color-badge-neutral-border:  color-mix(in srgb, var(--color-status-neutral) 30%, var(--color-bg-surface));
+
+  /* ALERT — subtle tone-tinted surface + hairline border, derived via
+     color-mix, for the persistent/standing Alert component. These are the
+     LIGHT values. MUST ALSO BE RE-DECLARED IN THE .dark BLOCK BELOW — same
+     reasoning as the BADGE block above (a color-mix() custom property bakes
+     in its var() inputs at its declaring selector; a single :root-only
+     declaration would freeze at the light-mode result inside .dark).
+     Percentages are per-tone, not uniform — chosen so BOTH the title
+     (--color-status-{tone}-text) and the description (--color-text-secondary)
+     clear WCAG AA 4.5:1 against the tint in BOTH modes, computed via a Node
+     WCAG relative-luminance script (not eyeballed), same method as the Badge
+     tint audit. Description is the tighter constraint in every tone — see
+     docs/DOC-colour-system.md for the full ratio table:
+       success 7% / 24%, error 5% / 24%, warning 7% / 24%, info 6% / 24%.
+     Border is a flat 24% for all four tones (visually stronger than bg,
+     no text sits on it so no contrast minimum applies). */
+  --color-alert-success-bg:      color-mix(in srgb, var(--color-status-success) 7%, var(--color-bg-surface));
+  --color-alert-success-border:  color-mix(in srgb, var(--color-status-success) 24%, var(--color-bg-surface));
+  --color-alert-error-bg:        color-mix(in srgb, var(--color-status-error) 5%, var(--color-bg-surface));
+  --color-alert-error-border:    color-mix(in srgb, var(--color-status-error) 24%, var(--color-bg-surface));
+  --color-alert-warning-bg:      color-mix(in srgb, var(--color-status-warning) 7%, var(--color-bg-surface));
+  --color-alert-warning-border:  color-mix(in srgb, var(--color-status-warning) 24%, var(--color-bg-surface));
+  --color-alert-info-bg:         color-mix(in srgb, var(--color-status-info) 6%, var(--color-bg-surface));
+  --color-alert-info-border:     color-mix(in srgb, var(--color-status-info) 24%, var(--color-bg-surface));
+
+  /* AVATAR — monogram/icon-fallback disc. These are the LIGHT values.
+     MUST ALSO BE RE-DECLARED IN THE .dark BLOCK BELOW — same color-mix
+     baking-in rule as BADGE/ALERT above (a single :root-only declaration
+     freezes at its light-mode result and does not re-adapt inside .dark).
+     2026-07-08 fix pass — supersedes reusing --color-brand-tint/-text for
+     Avatar (see docs/DECISIONS.md): that pairing's dark value, charcoal-600
+     #262626, sits at ~1.1:1 against the charcoal-700 #1e1e1e surface — the
+     disc was empirically invisible in dark, only the initials floated.
+     LIGHT is unchanged in appearance: orange-50 bg / brick-500 fg, the
+     exact hex the old brand-tint pairing already resolved to. */
+  --color-avatar-bg: var(--primitive-orange-50);
+  --color-avatar-fg: var(--primitive-brick-500);
+
+  /* TABLE — row interaction fills (2026-07-10). Table is a flush (--elevation-0)
+     container, so row hover/selection needs its own fill rather than reusing a
+     card-level token. --color-table-row-hover is a plain per-mode var (a
+     subtle lift, not a color-mix). --color-table-row-selected IS a color-mix
+     and MUST be re-declared separately in both :root and .dark — the same
+     Badge/Alert/Avatar/Chart baking rule (a color-mix() custom property bakes
+     in its var() inputs at its declaring selector and does not re-substitute
+     per descendant; a :root-only declaration would freeze dark mode at the
+     light-mode mix). Selection is also carried by the row Checkbox and
+     aria-selected, so this fill is decorative/reinforcing, not the sole
+     conveyor — see docs/DOC-colour-system.md for the AA-text-over-fill audit. */
+  --color-table-row-hover:     var(--primitive-cloud-500);
+  --color-table-row-selected:  color-mix(in srgb, var(--color-interactive-default) 8%, var(--color-bg-surface));
+
+  /* LOADER — skeleton shimmer */
+  /* NOTE: no --primitive-neutral family; cloud = light neutral, charcoal = dark neutral */
+  --color-skeleton-base:        var(--primitive-cloud-400);
+  --color-skeleton-highlight:   var(--primitive-cloud-50);
+
+  /* LOADER — progress bar */
+  --color-progress-track:       var(--primitive-cloud-600);
+  --color-progress-fill:        var(--primitive-brick-500);
+
+  /* LOADER — pulse dot */
+  --color-pulse-brand:          var(--primitive-brick-500);  /* AI processing / active — matches brand btn */
+  --color-pulse-default:        var(--primitive-cloud-800);
+  --color-pulse-success:        var(--primitive-green-500);
+  --color-pulse-warning:        var(--primitive-yellow-500);
+  --color-pulse-error:          var(--primitive-red-500);
+
+  /* CHART — Chart component (2026-07-10). Option-A palette: a single
+     monochromatic brand series (primary/primary-muted) for line/bar/radial/
+     sparkline/barHorizontal, plus a small scoped categorical ramp (cat-1..5)
+     for stacked-bar/donut only. Zero new primitives — every stop below
+     already exists. --color-chart-primary-muted/-fill-from/-fill-to are
+     color-mix() derivations and MUST be re-declared in BOTH :root AND .dark
+     (the Badge/Alert/Avatar baking rule — a color-mix custom property bakes
+     in its var() inputs at its declaring selector and does not re-substitute
+     per descendant; a :root-only declaration would freeze dark mode at the
+     light-mode mix). Accesslint / WCAG 1.4.11 audit (Node relative-luminance
+     script, ≥3:1 required for these graphical fills, checked against
+     --color-bg-surface in both modes): chart-primary and cat-1..cat-5 ALL
+     PASS as specified — light 5.02–18.73:1, dark 6.01–12.27:1 (yellow-700
+     and the greys, flagged as the likely risks, actually clear 3:1 with
+     margin; no stop substitution was needed). chart-primary-muted is the
+     ONE deliberate exception, documented rather than silently patched: at
+     22% mix it measures 1.39:1 light / 1.53:1 dark, both well under 3:1 —
+     but this token exists specifically to be a de-emphasized ghost/
+     comparison fill ("never competing with the primary" per the component
+     brief), and forcing 3:1 would require a 68% (light) / 54% (dark) mix —
+     visually indistinguishable from the primary itself, defeating the
+     token's purpose. WCAG 1.4.11 exempts graphical objects not required to
+     understand the content; the muted fill is always a supplementary
+     comparison/secondary layer, never the sole carrier of a value, and the
+     Chart component's sr-only data-table mirror plus direct value labels
+     keep every underlying number accessible regardless of fill contrast.
+     See docs/DOC-colour-system.md and docs/DECISIONS.md (2026-07-10) for
+     the full audit table. */
+  --color-chart-primary:              var(--primitive-brick-500);
+  --color-chart-primary-muted:        color-mix(in srgb, var(--primitive-brick-500) 22%, var(--color-bg-surface));
+  --color-chart-primary-fill-from:    color-mix(in srgb, var(--primitive-brick-500) 24%, transparent);
+  --color-chart-primary-fill-to:      color-mix(in srgb, var(--primitive-brick-500) 0%, transparent);
+  --color-chart-cat-1:                var(--primitive-brick-500);
+  --color-chart-cat-2:                var(--primitive-charcoal-900);
+  --color-chart-cat-3:                var(--primitive-green-500);
+  --color-chart-cat-4:                var(--primitive-yellow-700);
+  --color-chart-cat-5:                var(--primitive-cloud-900);
+  --color-chart-grid:                 var(--primitive-cloud-600);
+  --color-chart-axis:                 var(--primitive-cloud-700);
+  --color-chart-track:                var(--primitive-cloud-500);
+  --color-chart-readout-bg:           var(--primitive-charcoal-900);
+  --color-chart-readout-text:         var(--primitive-cloud-50);
+
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   LAYER 2 — SEMANTIC TOKENS — DARK MODE
+   ════════════════════════════════════════════════════════════ */
+.dark {
+
+  /* BRAND */
+  --color-brand-btn:            var(--primitive-orange-500);
+  --color-brand-btn-text:       var(--primitive-charcoal-900);
+  --color-brand-tint:           var(--primitive-charcoal-600);
+  --color-brand-tint-text:      var(--primitive-orange-500);
+  /* BRAND TINT BORDER — dark re-declaration, REQUIRED (not optional, same
+     rule as the color-mix families above): a single :root-only declaration
+     would freeze at the light-mode result. Unlike Badge/Alert/Avatar's dark
+     re-declarations, this one is NOT a re-mixed color-mix formula — it's a
+     direct alias to --color-badge-neutral-border, deliberately grey rather
+     than a mixed orange (orange-on-dark reads too hot for a soft hairline).
+     Resolves to .dark's own --color-badge-neutral-border (#373737), giving
+     the brand and neutral count Chips an identical dark-mode hairline. */
+  --color-brand-tint-border:    var(--color-badge-neutral-border);
+
+  /* BACKGROUND */
+  --color-bg-primary:           var(--primitive-charcoal-900);
+  --color-bg-secondary:         var(--primitive-charcoal-800);
+  --color-bg-surface:           var(--primitive-charcoal-700);
+  --color-bg-overlay:           rgba(0, 0, 0, 0.6);
+  --color-bg-input:             var(--primitive-charcoal-800);
+
+  /* TEXT */
+  --color-text-primary:         var(--primitive-cloud-50);
+  --color-text-secondary:       var(--primitive-cloud-700);
+  --color-text-tertiary:        var(--primitive-cloud-800);
+  --color-text-on-interactive-primary:    var(--primitive-charcoal-900); /* near-black on orange brand fill */
+  --color-text-on-interactive-secondary:  var(--color-text-primary);     /* alias to page text — near-white on dark fills; mirrors light mode design intent, not its hex values */
+  --color-text-on-interactive-error:      var(--primitive-cloud-50);     /* always white, mode-invariant */
+
+  /* BORDER */
+  --color-border-default:       var(--primitive-charcoal-500);
+  --color-border-subtle:        var(--primitive-charcoal-700);
+  --color-border-strong:        var(--primitive-charcoal-400);
+  /* charcoal-300 #707070 (L=0.162): 3.78:1 vs bg-primary dark (#121212, L=0.006) ✅
+     charcoal-200 #9d9d9d (L=0.337): 6.91:1 vs bg-primary dark ✅ */
+  --color-border-input:         var(--primitive-charcoal-300); /* #707070 — resting */
+  --color-border-input-hover:   var(--primitive-charcoal-200); /* #9d9d9d — hover   */
+
+  /* INTERACTIVE — primary (brand CTA) */
+  --color-interactive-default:  var(--primitive-orange-500);
+  --color-interactive-hover:    var(--primitive-orange-400);
+  --color-interactive-active:   var(--primitive-orange-600);
+
+  /* INTERACTIVE — secondary — dark mode: genuinely dark fills, light text (charcoal-400/300/500)
+     hover = charcoal-300 (lighter, "lift") · default = charcoal-400 · active = charcoal-500 (darker, "push")
+     Mirrors Primary's hover-lightens/active-darkens shape in dark mode.
+     White text AA: default 7.45:1 · hover 4.96:1 · active 14.35:1 — all ✅
+     Fill vs bg-surface: hover 3.36:1 · default 2.24:1 (intentionally recessive) · active 1.16:1 (50ms momentary) */
+  --color-interactive-secondary:        var(--primitive-charcoal-400);  /* #555555 — resting fill, subtly above bg */
+  --color-interactive-secondary-hover:  var(--primitive-charcoal-300);  /* #707070 — lighter on hover, "lift" */
+  --color-interactive-secondary-active: var(--primitive-charcoal-500);  /* #2a2a2a — darker on press, "push" */
+
+  /* INTERACTIVE — error / destructive (identical both modes) */
+  --color-interactive-error:        var(--primitive-red-500);
+  --color-interactive-error-hover:  var(--primitive-red-600);
+  --color-interactive-error-active: var(--primitive-red-700);
+
+  /* FOCUS RING */
+  --color-focus-ring: var(--color-interactive-default);
+
+  /* NAV */
+  --color-nav-inactive:         var(--primitive-charcoal-200);
+
+  /* STATUS — badge fills unchanged in dark */
+  --color-status-success:       var(--primitive-green-500);
+  --color-status-error:         var(--primitive-red-500);
+  --color-status-warning:       var(--primitive-yellow-500);
+  --color-status-info:          var(--primitive-blue-500);
+  /* --color-status-neutral DOES override in dark — see the light-mode comment above */
+  --color-status-neutral:       var(--primitive-charcoal-200);  /* #9d9d9d */
+
+  /* STATUS — title text on surface card, dark mode */
+  --color-status-success-text:  var(--primitive-green-300);
+  --color-status-error-text:    var(--primitive-red-200);
+  --color-status-warning-text:  var(--primitive-yellow-300);
+  --color-status-info-text:     var(--primitive-blue-300);
+
+  /* STATUS — background tints for status cards, dark mode */
+  --color-status-success-bg:    var(--primitive-charcoal-700);
+  --color-status-error-bg:      var(--primitive-charcoal-700);
+  --color-status-warning-bg:    var(--primitive-charcoal-700);
+  --color-status-info-bg:       var(--primitive-charcoal-700);
+
+  /* BADGE — dark re-declaration. REQUIRED, not optional: see the long comment
+     on the light-mode block above for why a single :root declaration doesn't
+     auto-adapt (a fix-pass bug fixed here — the dark canvas previously
+     rendered these as pale light tints because .dark never redeclared them).
+     Same color-mix formula, same 14%/30% for success/warning/error/info —
+     re-declaring lets each expression bake using .dark's own
+     --color-status-{tone}/--color-bg-surface instead of inheriting :root's
+     already-resolved light value.
+     Neutral border here is 20%, NOT 30% (unlike its light counterpart) — at
+     30% dark resolves to #444444, visibly too heavy against the very
+     subtle 8% dark fill (#282828); 20% resolves to #373737, a proportionate
+     hairline. This asymmetry (light 30% / dark 20%) is intentional, not a
+     mistake — light neutral was left unchanged/approved, only dark needed
+     the correction. */
+  --color-badge-success-bg:      color-mix(in srgb, var(--color-status-success) 14%, var(--color-bg-surface));
+  --color-badge-success-border:  color-mix(in srgb, var(--color-status-success) 30%, var(--color-bg-surface));
+  --color-badge-warning-bg:      color-mix(in srgb, var(--color-status-warning) 14%, var(--color-bg-surface));
+  --color-badge-warning-border:  color-mix(in srgb, var(--color-status-warning) 30%, var(--color-bg-surface));
+  --color-badge-error-bg:        color-mix(in srgb, var(--color-status-error) 14%, var(--color-bg-surface));
+  --color-badge-error-border:    color-mix(in srgb, var(--color-status-error) 30%, var(--color-bg-surface));
+  --color-badge-info-bg:         color-mix(in srgb, var(--color-status-info) 14%, var(--color-bg-surface));
+  --color-badge-info-border:     color-mix(in srgb, var(--color-status-info) 30%, var(--color-bg-surface));
+  --color-badge-neutral-bg:      color-mix(in srgb, var(--color-status-neutral) 8%, var(--color-bg-surface));
+  --color-badge-neutral-border:  color-mix(in srgb, var(--color-status-neutral) 20%, var(--color-bg-surface));
+
+  /* ALERT — dark re-declaration. REQUIRED, not optional — same reasoning as
+     the BADGE dark re-declaration above. Same color-mix formula and same
+     per-tone percentages as the light block (unlike Badge's neutral border,
+     no tone here needed a dark-only percentage adjustment — all four cleared
+     AA 4.5:1 for both title and description at their light-mode percentage
+     when re-mixed against the dark surface too). */
+  --color-alert-success-bg:      color-mix(in srgb, var(--color-status-success) 7%, var(--color-bg-surface));
+  --color-alert-success-border:  color-mix(in srgb, var(--color-status-success) 24%, var(--color-bg-surface));
+  --color-alert-error-bg:        color-mix(in srgb, var(--color-status-error) 5%, var(--color-bg-surface));
+  --color-alert-error-border:    color-mix(in srgb, var(--color-status-error) 24%, var(--color-bg-surface));
+  --color-alert-warning-bg:      color-mix(in srgb, var(--color-status-warning) 7%, var(--color-bg-surface));
+  --color-alert-warning-border:  color-mix(in srgb, var(--color-status-warning) 24%, var(--color-bg-surface));
+  --color-alert-info-bg:         color-mix(in srgb, var(--color-status-info) 6%, var(--color-bg-surface));
+  --color-alert-info-border:     color-mix(in srgb, var(--color-status-info) 24%, var(--color-bg-surface));
+
+  /* AVATAR — dark re-declaration. REQUIRED, not optional — see the light-mode
+     comment above. --color-avatar-bg is a color-mix (25% --color-interactive-
+     default into --color-bg-surface, both of which resolve differently in
+     .dark, so this MUST bake fresh here) — a warm, on-brand disc that reads
+     as a distinct object against the charcoal-700 #1e1e1e surface (1.62:1
+     luminance separation — clears this pass's ~1.5:1 target with margin, so
+     no --color-border-subtle definition ring was needed). --color-avatar-fg
+     is orange-50 — a deliberate value-flip from light mode's fg (brick-500,
+     a DARK warm tone on a LIGHT disc) to a LIGHT warm tone on this DARK disc,
+     the same "flip which end is light/dark" pattern already used by
+     --color-text-on-interactive-primary. Contrast: 9.50:1 — clears AA 4.5:1
+     with very large margin (initials are small text). */
+  --color-avatar-bg: color-mix(in srgb, var(--color-interactive-default) 25%, var(--color-bg-surface));
+  --color-avatar-fg: var(--primitive-orange-50);
+
+  /* TABLE — dark re-declaration. REQUIRED for --color-table-row-selected, not
+     optional — same color-mix baking-in rule as Badge/Alert/Avatar/Chart
+     above. --color-table-row-hover is a plain var, not a color-mix, but is
+     still re-declared per mode like every other per-mode token in this file
+     (--color-focus-ring, --color-brand-tint-border). 14% (vs light's 8%) —
+     the same mix needs a higher percentage against the darker surface to
+     read as a comparable, visible lift; verified via the Node WCAG
+     relative-luminance script that --color-text-primary still clears AA
+     4.5:1 as body text over the resolved fill in both modes (see
+     docs/DOC-colour-system.md). */
+  --color-table-row-hover:     var(--primitive-charcoal-600);
+  --color-table-row-selected:  color-mix(in srgb, var(--color-interactive-default) 14%, var(--color-bg-surface));
+
+  /* Elevation overrides — dark mode uses reduced shadows */
+  --elevation-0: var(--shadow-none);
+  --elevation-1: 0 1px 2px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.04);
+  --elevation-2: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06);
+  --elevation-3: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
+
+  /* LOADER — skeleton shimmer */
+  --color-skeleton-base:        var(--primitive-charcoal-600);
+  --color-skeleton-highlight:   var(--primitive-charcoal-500);
+
+  /* LOADER — progress bar */
+  --color-progress-track:       var(--primitive-charcoal-600);
+  --color-progress-fill:        var(--primitive-orange-500);
+
+  /* LOADER — pulse dot */
+  --color-pulse-brand:          var(--primitive-orange-500); /* dark mode: orange matches brand btn */
+  --color-pulse-default:        var(--primitive-charcoal-300);
+  /* pulse success/warning/error unchanged — status primitives are mode-agnostic */
+
+  /* CHART — dark re-declaration. REQUIRED, not optional — same color-mix
+     baking-in rule as the :root block above. See that block's long comment
+     for the full accesslint/WCAG 1.4.11 audit (chart-primary + cat-1..5 all
+     pass ≥3:1 vs --color-bg-surface as specified; chart-primary-muted is a
+     deliberate, documented exception — a de-emphasized comparison fill,
+     never the sole carrier of a value). */
+  --color-chart-primary:              var(--primitive-orange-500);
+  --color-chart-primary-muted:        color-mix(in srgb, var(--primitive-orange-500) 22%, var(--color-bg-surface));
+  --color-chart-primary-fill-from:    color-mix(in srgb, var(--primitive-orange-500) 24%, transparent);
+  --color-chart-primary-fill-to:      color-mix(in srgb, var(--primitive-orange-500) 0%, transparent);
+  --color-chart-cat-1:                var(--primitive-orange-500);
+  --color-chart-cat-2:                var(--primitive-cloud-600);
+  --color-chart-cat-3:                var(--primitive-green-300);
+  --color-chart-cat-4:                var(--primitive-yellow-500);
+  --color-chart-cat-5:                var(--primitive-charcoal-200);
+  --color-chart-grid:                 var(--primitive-charcoal-500);
+  --color-chart-axis:                 var(--primitive-charcoal-300);
+  --color-chart-track:                var(--primitive-charcoal-600);
+  --color-chart-readout-bg:           var(--primitive-charcoal-500);
+  --color-chart-readout-text:         var(--primitive-cloud-100);
+
+}
+
+
+/* ── Suppress native WebKit search cancel button ────────────
+   When type="search" is used, Chrome/Safari inject a native × clear button.
+   The Input component renders its own clear control (onClear prop), so the
+   native button is suppressed globally here. */
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+
+/* ── BASE STYLES ─────────────────────────────────────────────*/
+@layer base {
+  html {
+    font-size: 16px;
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 { font-family: var(--font-heading); font-size: var(--text-h1); font-weight: 700; line-height: var(--lh-h1); letter-spacing: -0.03em; }
+  h2 { font-family: var(--font-heading); font-size: var(--text-h2); font-weight: 600; line-height: var(--lh-h2); letter-spacing: -0.02em; }
+  h3 { font-family: var(--font-heading); font-size: var(--text-h3); font-weight: 600; line-height: var(--lh-h3); letter-spacing: -0.01em; }
+  /* h4 and below: --font-sans (Inter), never --font-heading */
+
+  * { box-sizing: border-box; }
+  *:focus-visible { outline: 2px solid var(--color-brand-btn); outline-offset: 2px; }
+}
